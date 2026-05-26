@@ -140,239 +140,294 @@
     </section>
   </main>
 
-  <script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
 /**
- * TechExpert Nexgen — Admin Dashboard Inventory Sourcing Engine
- * PHP Local Server File System Integration Setup
+ * Velloux Kirana System — Owner Administration Matrix Dashboard
+ * Synchronized with Live Supabase Cloud Database Core
  */
 
+// ========================================================
+// SUPABASE CLIENT INITIALIZATION CONFIGURATION
+// ========================================================
+const SUPABASE_URL = "https://your-project-id.supabase.co";
+const SUPABASE_ANON_KEY = "your-actual-anon-public-key-here";
+
+// Initialize the active connection client instance
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ========================================================
+// REPOSITORY TARGET VARIABLES
+// ========================================================
 let products = [];
 let categories = [];
+let editingProductId = null;
 
-// Clean relative server pathing definitions
-const PRODUCTS_JSON_API = "/api/products.json";
-const UPDATE_PHP_API = "/update-products.php";
-
+// --- LIFE CYCLE INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
-    fetchCloudDatabase(() => {
-        renderAdminInventoryTable();
-        populateCategoryDropdown();
-    });
-    initializeAdminFormSubmission();
+    // Initial Real-time Database Pull Execution
+    refreshLocalMemoryData();
+    initializeFormEngine();
     initializeSystemThemeEngine();
 });
 
-// 1. READ DATABASES SECURELY FROM THE LOCAL REPOSITORY
-function fetchCloudDatabase(callback) {
-  fetch(`${PRODUCTS_JSON_API}?t=${new Date().getTime()}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Server data pipeline read disruption.");
-      return res.json();
-    })
-    .then(data => {
-      if (data) {
-        products = data.products || [];
-        categories = data.categories || [];
-        if (callback) callback();
-      }
-    })
-    .catch(err => console.error("Database load failed:", err));
-}
+// ========================================================
+// SUPABASE REALTIME CLOUD CORE INTERFACE FUNCTIONS
+// ========================================================
 
-// 2. WRITE/UPDATE THE DATABASES VIA PHP ENDPOINT
-function writeCloudDatabase(logMessage = "Synchronize inventory parameters") {
-  const payload = {
-    password: "amit@1993", // Matches your PHP script security parameter
-    categories: categories,
-    products: products
-  };
+// 1. Fetch live stock inventory matrix rows from Supabase
+async function refreshLocalMemoryData() {
+    try {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('id', { ascending: true });
 
-  fetch(UPDATE_PHP_API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("HTTP connection protocol failure.");
-    return res.json();
-  })
-  .then(data => {
-    if (data && data.success) {
-      showToast(data.message || "Database synchronized safely!");
-    } else {
-      showToast("Access configuration rejected: " + (data.message || "Unknown error"));
+        if (error) throw error;
+        
+        products = data || [];
+        
+        // Extract unique category designations dynamically from your live products array
+        categories = [...new Set(products.map(p => p.category))];
+        
+        renderAdminInventoryTable();
+        populateCategoryDropdown();
+    } catch (err) {
+        console.error("Database initialization telemetry failed:", err.message);
+        showToast("⚠️ Could not load database. Check console logs.");
     }
-  })
-  .catch(err => {
-    console.error("Local file system writing sequence faulted:", err);
-    showToast("Write synchronization error.");
-  });
 }
 
+// 2. Add or Edit a product node entry inside Supabase
+async function handleFormSubmit(payload) {
+    try {
+        // Build the structured object matching your database column keys
+        const productData = {
+            name: payload.name,
+            category: payload.category,
+            price: parseFloat(payload.price),
+            stock: payload.stock,
+            details: payload.details,
+            images: payload.images && payload.images.length > 0 ? payload.images : ['https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'],
+            video: payload.video || ""
+        };
+
+        if (editingProductId !== null) {
+            // UPDATE OPERATION: Edit an existing row matching the active ID
+            const { error } = await supabase
+                .from('products')
+                .update(productData)
+                .eq('id', editingProductId);
+
+            if (error) throw error;
+            showToast("Commodity profile optimized inside Supabase Cloud!");
+        } else {
+            // INSERT OPERATION: Push a brand new product node row
+            const { error } = await supabase
+                .from('products')
+                .insert([productData]);
+
+            if (error) throw error;
+            showToast("New stock node provisioned successfully!");
+        }
+        
+        clearFormAndResetContext();
+        refreshLocalMemoryData();
+    } catch (err) {
+        alert("Supabase Write matrix transaction operation failed: " + err.message);
+    }
+}
+
+// 3. Quick Table Dropdown Stock Alteration Sync
+window.alterStockState = async function(id, newVal) {
+    try {
+        const { error } = await supabase
+            .from('products')
+            .update({ stock: newVal })
+            .eq('id', id);
+
+        if (error) throw error;
+        showToast("Stock matrix status redirected.");
+        
+        // Refresh local memory silently to keep data consistent
+        const target = products.find(p => p.id === id);
+        if (target) target.stock = newVal;
+    } catch (err) {
+        console.error("Stock alter operation breakdown:", err.message);
+        showToast("⚠️ Failed to update stock mapping status.");
+    }
+};
+
+// 4. Permanent Database Row Removal
+window.removeProductNode = async function(id) {
+    if (!confirm("Permanently wipe this entry from Supabase cloud database registry?")) return;
+    try {
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        showToast("Item wiped out of cloud server database context.");
+        refreshLocalMemoryData();
+    } catch (err) {
+        console.error("Deletion task execution error telemetry:", err.message);
+        showToast("⚠️ Failed to purge target data row node.");
+    }
+};
+
+// ========================================================
+// ADMINISTRATIVE PANEL RENDERING CORE INTERFACE
+// ========================================================
 function populateCategoryDropdown() {
-  const selectElement = document.getElementById("prod-cat");
-  if (!selectElement) return;
-  const currentVal = selectElement.value;
-  selectElement.innerHTML = "";
-  categories.forEach(cat => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.text = cat;
-    selectElement.appendChild(opt);
-  });
-  if (currentVal && categories.includes(currentVal)) selectElement.value = currentVal;
+    const dropdown = document.getElementById("product-category");
+    if (!dropdown) return;
+    
+    // Save current user selection fallback
+    const currentSelection = dropdown.value;
+    dropdown.innerHTML = '<option value="" disabled selected>Select Commodity Class</option>';
+    
+    categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.innerText = cat;
+        dropdown.appendChild(option);
+    });
+    
+    if (currentSelection) dropdown.value = currentSelection;
 }
-
-window.promptAddCategory = function() {
-  const newCat = window.prompt("Enter new category identification name to register:");
-  if (!newCat) return;
-  const cleanCat = newCat.trim();
-  if (cleanCat === "" || categories.some(c => c.toLowerCase() === cleanCat.toLowerCase())) return;
-
-  categories.push(cleanCat);
-  populateCategoryDropdown();
-  writeCloudDatabase(`Added custom structural category: ${cleanCat}`);
-};
-
-window.promptRemoveCategory = function() {
-  const selectElement = document.getElementById("prod-cat");
-  if (!selectElement) return;
-  const currentSelection = selectElement.value;
-  if (!currentSelection || !window.confirm(`Delete category: "${currentSelection}"?`)) return;
-
-  categories = categories.filter(c => c !== currentSelection);
-  populateCategoryDropdown();
-  writeCloudDatabase(`Removed category module: ${currentSelection}`);
-};
 
 function renderAdminInventoryTable() {
-  const tbody = document.getElementById("admin-table-body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  products.sort((a, b) => a.id - b.id);
+    const tableBody = document.getElementById("inventory-table-body");
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
 
-  products.forEach(p => {
-    const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=600&q=80';
-    const tr = document.createElement("tr");
-    tr.className = "border-b border-slate-100 dark:border-slate-900/60 text-xs text-slate-700 dark:text-slate-300";
-    tr.innerHTML = `
-      <td class="p-4">
-        <input type="number" value="${p.id}" class="w-16 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 font-mono text-center text-brandSkyDeep dark:text-brandSky font-bold focus:outline-none" onchange="handleSequenceShift(${p.id}, this.value)">
-      </td>
-      <td class="p-4">
-        <div class="flex items-center gap-3"><img src="${primaryImg}" class="w-8 h-8 rounded object-cover bg-slate-100"><span class="font-medium text-brandDark dark:text-white">${p.name}</span></div>
-      </td>
-      <td class="p-4"><span class="px-2 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800/40 rounded-md font-mono text-[10px] text-slate-500">${p.category}</span></td>
-      <td class="p-4">
-        <div class="flex items-center gap-1 max-w-[140px]"><span class="text-slate-400 font-medium">₹</span><input type="number" value="${p.price}" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 font-mono text-xs font-semibold focus:outline-none" onchange="updateCustomPrice(${p.id}, this.value)"></div>
-      </td>
-      <td class="p-4">
-        <select class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 cursor-pointer font-medium" onchange="alterStockState(${p.id}, this.value)">
-          <option value="In Stock" ${p.stock === 'In Stock' ? 'selected' : ''}>In Stock</option>
-          <option value="Limited Stock" ${p.stock === 'Limited Stock' ? 'selected' : ''}>Limited Stock</option>
-          <option value="Out of Stock" ${p.stock === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
-        </select>
-      </td>
-      <td class="p-4 text-center"><button class="bg-rose-500/10 text-rose-500 border border-rose-500/20 px-3 py-1 rounded-lg hover:bg-rose-500 hover:text-white" onclick="removeProductNode(${p.id})">Remove</button></td>`;
-    tbody.appendChild(tr);
-  });
-}
+    if (products.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="py-12 text-center font-mono text-xs text-slate-400">// Cloud database data tier array matrix is entirely unpopulated.</td></tr>`;
+        return;
+    }
 
-window.handleSequenceShift = function(oldId, rawNewValue) {
-  const newId = parseInt(rawNewValue, 10);
-  if (isNaN(newId) || newId < 1) { renderAdminInventoryTable(); return; }
-  const targetProduct = products.find(p => p.id === oldId);
-  if (!targetProduct) return;
+    products.forEach(product => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-all";
+        
+        const primaryImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
 
-  if (oldId !== newId) {
-    products.forEach((prod) => {
-      if (prod.id !== oldId) {
-        if (oldId < newId) { if (prod.id > oldId && prod.id <= newId) prod.id -= 1; }
-        else if (oldId > newId) { if (prod.id >= newId && prod.id < oldId) prod.id += 1; }
-      }
+        tr.innerHTML = `
+            <td class="p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200/50"><img src="${primaryImg}" class="w-full h-full object-cover"></div>
+                <div>
+                    <h4 class="text-xs font-semibold text-brandDark dark:text-white max-w-[180px] truncate">${product.name}</h4>
+                    <span class="font-mono text-[9px] uppercase tracking-wider text-slate-400">// ID: ${product.id}</span>
+                </div>
+            </td>
+            <td class="p-4 font-mono text-[10px] text-slate-500 uppercase tracking-wide">${product.category}</td>
+            <td class="p-4 font-semibold text-xs text-brandDark dark:text-white">₹${Number(product.price).toLocaleString()}</td>
+            <td class="p-4">
+                <select onchange="alterStockState(${product.id}, this.value)" class="bg-transparent font-mono text-[11px] font-medium rounded-lg border border-slate-200 dark:border-slate-800 p-1 cursor-pointer focus:outline-none">
+                    <option value="In Stock" ${product.stock === 'In Stock' ? 'selected' : ''}>🟢 In Stock</option>
+                    <option value="Low Stock" ${product.stock === 'Low Stock' ? 'selected' : ''}>🟡 Low Stock</option>
+                    <option value="Out of Stock" ${product.stock === 'Out of Stock' ? 'selected' : ''}>🔴 Out of Stock</option>
+                </select>
+            </td>
+            <td class="p-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="stageProductModification(${product.id})" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:text-brandSky text-slate-500 transition-all"><span class="text-[11px] font-mono">EDIT</span></button>
+                    <button onclick="removeProductNode(${product.id})" class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"><span class="text-[11px] font-mono">WIPE</span></button>
+                </div>
+            </td>`;
+        tableBody.appendChild(tr);
     });
-    targetProduct.id = newId;
-    products.sort((a, b) => a.id - b.id);
-    products.forEach((p, idx) => p.id = idx + 1);
-    writeCloudDatabase(`Sequence system re-indexed. Shifted entity ${oldId} to position ${newId}`);
-    renderAdminInventoryTable();
-  }
-};
-
-function initializeAdminFormSubmission() {
-  const form = document.getElementById("admin-add-form");
-  if (!form) return;
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const name = document.getElementById("prod-name").value.trim();
-    const category = document.getElementById("prod-cat").value;
-    const price = parseInt(document.getElementById("prod-price").value, 10);
-    const stock = document.getElementById("prod-stock").value;
-    const details = document.getElementById("prod-details") ? document.getElementById("prod-details").value.trim() : "";
-    const videoUrl = document.getElementById("prod-video") ? document.getElementById("prod-video").value.trim() : "";
-    
-    const img1 = document.getElementById("prod-img-1").value.trim();
-    const img2 = document.getElementById("prod-img-2").value.trim();
-    const img3 = document.getElementById("prod-img-3").value.trim();
-    const img4 = document.getElementById("prod-img-4").value.trim();
-
-    const imagesList = [img1, img2, img3, img4].filter(url => url !== "");
-    if (imagesList.length === 0) imagesList.push("https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=600&q=80");
-
-    const nextId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id: nextId, name, category, price, stock, rating: 5.0, images: imagesList, video: videoUrl, details });
-    
-    renderAdminInventoryTable();
-    writeCloudDatabase(`Added product asset node: ${name}`);
-    form.reset();
-  });
 }
 
-window.updateCustomPrice = function(id, value) {
-  const target = products.find(p => p.id === id);
-  if (!target) return;
-  const formattedPrice = parseInt(value, 10);
-  if (isNaN(formattedPrice) || formattedPrice < 0) { renderAdminInventoryTable(); return; }
-  target.price = formattedPrice;
-  writeCloudDatabase(`Calibrated custom price parameters on entry ID ${id}`);
+function initializeFormEngine() {
+    const form = document.getElementById("product-management-form");
+    if (!form) return;
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        
+        const imagesInput = document.getElementById("product-images").value.trim();
+        const imagesArray = imagesInput ? imagesInput.split(",").map(url => url.trim()) : [];
+
+        const payload = {
+            name: document.getElementById("product-name").value.trim(),
+            category: document.getElementById("product-category").value || "Grains & Rice",
+            price: document.getElementById("product-price").value,
+            stock: document.getElementById("form-stock-state").value || "In Stock",
+            details: document.getElementById("product-details").value.trim(),
+            images: imagesArray,
+            video: document.getElementById("product-video") ? document.getElementById("product-video").value.trim() : ""
+        };
+
+        handleFormSubmit(payload);
+    });
+}
+
+window.stageProductModification = function(id) {
+    const target = products.find(p => p.id === id);
+    if (!target) return;
+
+    editingProductId = id;
+    document.getElementById("form-action-title").innerText = `// OPTIMIZE STOCK INDEX NODE #${id}`;
+    document.getElementById("form-submit-btn-text").innerText = "Update Matrix Node";
+
+    document.getElementById("product-name").value = target.name;
+    document.getElementById("product-price").value = target.price;
+    document.getElementById("form-stock-state").value = target.stock;
+    document.getElementById("product-details").value = target.details || "";
+    document.getElementById("product-images").value = target.images ? target.images.join(", ") : "";
+    
+    if (document.getElementById("product-video")) {
+        document.getElementById("product-video").value = target.video || "";
+    }
+
+    // Force add category if it's custom and not in dropdown list elements yet
+    const dropdown = document.getElementById("product-category");
+    if (dropdown) {
+        if (![...dropdown.options].some(opt => opt.value === target.category)) {
+            const opt = document.createElement("option");
+            opt.value = target.category; opt.innerText = target.category;
+            dropdown.appendChild(opt);
+        }
+        dropdown.value = target.category;
+    }
+    
+    document.getElementById("product-name").focus();
 };
 
-window.alterStockState = function(id, value) {
-  const target = products.find(p => p.id === id);
-  if (!target) return;
-  target.stock = value;
-  writeCloudDatabase(`Altered stock allocation status parameters for entry node ${id}`);
-};
-
-window.removeProductNode = function(id) {
-  if (!confirm("Are you sure you want to delete this structural component row matrix completely?")) return;
-  products = products.filter(p => p.id !== id);
-  products.sort((a, b) => a.id - b.id);
-  products.forEach((p, idx) => p.id = idx + 1);
-  renderAdminInventoryTable();
-  writeCloudDatabase(`Dropped component row model entity sequence node ${id}`);
-};
+function clearFormAndResetContext() {
+    editingProductId = null;
+    document.getElementById("product-management-form").reset();
+    document.getElementById("form-action-title").innerText = "// PROVISION NEW STOCK ENGINE NODE";
+    document.getElementById("form-submit-btn-text").innerText = "Inject Asset to Cloud";
+}
 
 function initializeSystemThemeEngine() {
-  const switchBtn = document.getElementById("theme-toggle");
-  if (!switchBtn) return;
-  switchBtn.addEventListener("click", () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark'); localStorage.theme = 'light';
-    } else {
-      document.documentElement.classList.add('dark'); localStorage.theme = 'dark';
-    }
-  });
+    const switchBtn = document.getElementById("theme-toggle");
+    if (!switchBtn) return;
+    switchBtn.addEventListener("click", () => {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    });
 }
 
 function showToast(msg) {
-  const toast = document.createElement("div");
-  toast.className = "toast"; toast.innerText = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.classList.add("show"), 100);
-  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 300); }, 2500);
+    const toast = document.createElement("div"); 
+    toast.className = "toast"; 
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
 }
 </script>
 </body>
