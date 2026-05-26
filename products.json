@@ -1,12 +1,37 @@
 {
   "categories": [
-    "Wheat",
-    "Rice",
-    "Dry Fruits",
-    "Oils"
-    
+    "Grains & Rice",
+    "Flours & Atta",
+    "Spices & Oils",
+    "Pulses & Dals",
+    "Dry Fruits"
   ],
   "products": [
-  
+    {
+      "id": 1,
+      "name": "Premium Basmati Rice",
+      "category": "Grains & Rice",
+      "price": 110,
+      "stock": "In Stock",
+      "rating": 4.8,
+      "details": "Long-grain aged basmati rice with aromatic fragrance, perfect for biryani and daily premium meals.",
+      "images": [
+        "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80"
+      ],
+      "video": ""
+    },
+    {
+      "id": 2,
+      "name": "Pure Mustard Oil 1L",
+      "category": "Spices & Oils",
+      "price": 175,
+      "stock": "In Stock",
+      "rating": 4.6,
+      "details": "Cold-pressed pure kachi ghani mustard oil with strong aroma and natural antioxidants.",
+      "images": [
+        "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80"
+      ],
+      "video": ""
+    }
   ]
 }
