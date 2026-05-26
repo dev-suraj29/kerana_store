@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TechExpert Nexgen — Premium Store</title>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
@@ -454,7 +455,28 @@ let categories = [];
 let cart = [];
 let currentModalProduct = null;
 let currentModalQty = 1;
+    
+async function fetchStoreCatalogDatabase() {
+  try {
+    // Fetch all items from your Supabase cloud table ordered by ID
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true });
 
+    if (error) throw error;
+
+    masterCatalog = data || [];
+    
+    // Extract unique categories dynamically from your live products array
+    const uniqueCategories = [...new Set(masterCatalog.map(p => p.category))];
+    generateCategoryFilterInterfaceElements(uniqueCategories);
+    
+    renderStorefrontGrid();
+  } catch (err) {
+    console.error("Supabase pipeline breakdown:", err.message);
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof lucide !== 'undefined') lucide.createIcons();
   
