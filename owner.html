@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TechExpert Nexgen — Sourcing Control Admin</title>
+  <title>Velloux Kirana — Owner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,10 +27,10 @@
   <div class="bg-blur bg1 opacity-20"></div>
   <div class="bg-blur bg2 opacity-20"></div>
 
-  <header class="max-w-[1200px] mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+  <header class="max-w-[1400px] mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
     <div>
-      <span class="font-mono text-[10px] text-brandSkyDeep dark:text-brandSky tracking-widest uppercase block">// SYSTEM CONTROL GATE (GITHUB DB)</span>
-      <h1 class="text-3xl font-bold tracking-tight text-brandDark dark:text-white">Stock & Inventory Dashboard</h1>
+      <span class="font-mono text-[10px] text-brandSkyDeep dark:text-brandSky tracking-widest uppercase block">// VELLOUX KIRANA SYSTEM KERNEL</span>
+      <h1 class="text-3xl font-bold tracking-tight text-brandDark dark:text-white">Rajkumar Kirana Admin Panel</h1>
     </div>
     <div class="flex gap-4">
       <button id="theme-toggle" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-slate-50 dark:bg-slate-900 text-brandDark dark:text-white">💡</button>
@@ -38,109 +38,84 @@
     </div>
   </header>
 
-  <main class="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <main class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
     
-    <section class="lg:col-span-5 bg-slate-50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-900 rounded-[28px] p-6 h-fit">
-      <h2 class="text-base font-semibold text-brandDark dark:text-white mb-4 tracking-tight">Provision New Component Matrix</h2>
+    <section id="form-container" class="lg:col-span-5 bg-slate-50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-900 rounded-[28px] p-6 h-fit transition-all duration-300">
+      <h2 id="form-action-title" class="text-base font-semibold text-brandDark dark:text-white mb-4 tracking-tight">Provision Kirana Stock Node</h2>
       
-      <form id="admin-add-form" class="flex flex-col gap-4">
+      <form id="kirana-product-form" class="flex flex-col gap-4">
         <div>
-          <label class="text-[10px] font-mono text-slate-400 block mb-1">Product Component Name</label>
-          <input type="text" id="prod-name" required placeholder="e.g., RTX 5090 Graphics Card" class="form-input text-xs w-full bg-white dark:bg-slate-950">
+          <label class="text-[10px] font-mono text-slate-400 block mb-1">Item / Commodity Name</label>
+          <input type="text" id="prod-name" required placeholder="e.g., Premium Basmati Rice" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 outline-none focus:border-brandSky transition-all">
         </div>
 
-        <div>
-          <label class="text-[10px] font-mono text-slate-400 block mb-1">Architecture Class</label>
-          <div class="flex gap-2">
-            <select id="prod-cat" required class="form-input text-xs bg-white dark:bg-slate-950 flex-1 cursor-pointer">
-            </select>
-            <button type="button" onclick="promptAddCategory()" title="Add Custom Category"
-                    class="px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white border border-emerald-500/20 transition-all text-sm flex items-center justify-center font-bold">
-              +
-            </button>
-            <button type="button" onclick="promptRemoveCategory()" title="Remove Active Category"
-                    class="px-3.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 transition-all text-xs flex items-center justify-center font-bold">
-              ✕
-            </button>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] font-mono text-slate-400 block mb-1">Commodity Category</label>
+            <div class="flex gap-2">
+              <select id="prod-cat" required class="flex-1 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 outline-none cursor-pointer"></select>
+              <button type="button" onclick="promptAddCategory()" class="px-3 rounded-xl bg-emerald-500/10 text-emerald-500 font-bold border border-emerald-500/20">+</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] font-mono text-slate-400 block mb-1">Retail Price (INR)</label>
+            <input type="number" id="prod-price" required min="0" placeholder="e.g., 65" class="w-full text-xs font-mono bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:border-brandSky transition-all">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="text-[10px] font-mono text-slate-400 block mb-1">Price Configuration (INR)</label>
-            <input type="number" id="prod-price" required min="0" placeholder="e.g., 45000" class="form-input text-xs font-mono w-full bg-white dark:bg-slate-950">
-          </div>
-          <div>
-            <label class="text-[10px] font-mono text-slate-400 block mb-1">Initial Stock Allocation</label>
-            <select id="prod-stock" class="form-input text-xs bg-white dark:bg-slate-950 w-full cursor-pointer">
+            <label class="text-[10px] font-mono text-slate-400 block mb-1">Stock Availability</label>
+            <select id="prod-stock" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 outline-none cursor-pointer">
               <option value="In Stock">In Stock</option>
               <option value="Limited Stock">Limited Stock</option>
               <option value="Out of Stock">Out of Stock</option>
             </select>
           </div>
+          <div>
+            <label class="text-[10px] font-mono text-slate-400 block mb-1">Display Image Link</label>
+            <input type="text" id="prod-image" placeholder="Image URL address" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:border-brandSky transition-all">
+          </div>
         </div>
 
         <div>
-          <label class="text-[10px] font-mono text-slate-400 block mb-1">Hardware Specification Details</label>
-          <textarea id="prod-details" rows="3" placeholder="Enter board specs, logic architectures processing, testing parameters configurations..." class="form-input text-xs w-full bg-white dark:bg-slate-950 resize-none p-2.5 leading-relaxed"></textarea>
+          <label class="text-[10px] font-mono text-slate-400 block mb-1">Product Description</label>
+          <textarea id="prod-details" rows="2" placeholder="Quality parameters, sourcing origins..." class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 outline-none focus:border-brandSky transition-all resize-none"></textarea>
         </div>
 
-        <div class="border-t border-slate-200/40 dark:border-slate-800/40 pt-4 mt-1">
-          <span class="text-[9px] font-mono font-bold tracking-wider text-brandSkyDeep dark:text-brandSky uppercase block mb-3">// Media Layer Target Matrix Paths</span>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="text-[9px] font-mono text-slate-400 block mb-0.5">Primary Display Image Link</label>
-              <input type="text" id="prod-img-1" required placeholder="Image 1 Asset Path" class="form-input text-[11px] w-full bg-white dark:bg-slate-950">
-            </div>
-            <div>
-              <label class="text-[9px] font-mono text-slate-400 block mb-0.5">Alternative Image Link 2</label>
-              <input type="text" id="prod-img-2" placeholder="Image 2 Asset Path" class="form-input text-[11px] w-full bg-white dark:bg-slate-950">
-            </div>
-            <div>
-              <label class="text-[9px] font-mono text-slate-400 block mb-0.5">Alternative Image Link 3</label>
-              <input type="text" id="prod-img-3" placeholder="Image 3 Asset Path" class="form-input text-[11px] w-full bg-white dark:bg-slate-950">
-            </div>
-            <div>
-              <label class="text-[9px] font-mono text-slate-400 block mb-0.5">Alternative Image Link 4</label>
-              <input type="text" id="prod-img-4" placeholder="Image 4 Asset Path" class="form-input text-[11px] w-full bg-white dark:bg-slate-950">
-            </div>
-          </div>
-
-          <div class="mt-3">
-            <label class="text-[9px] font-mono text-slate-400 block mb-0.5">Product MP4 Demonstration Video Stream Link</label>
-            <input type="text" id="prod-video" placeholder="https://domain.com/video.mp4" class="form-input text-[11px] w-full bg-white dark:bg-slate-950">
-          </div>
+        <div class="flex gap-3 mt-2">
+          <button type="button" id="cancel-edit-btn" onclick="clearFormAndResetContext()" class="hidden bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-mono text-xs px-4 rounded-xl transition-all">Cancel</button>
+          <button type="submit" id="submit-form-btn" class="flex-1 py-3.5 bg-brandDark dark:bg-white text-white dark:text-brandDark rounded-xl text-xs font-mono font-medium tracking-wide hover:bg-brandSkyDeep dark:hover:bg-brandSky dark:hover:text-white transition-all shadow-lg">Initialize Stock Node</button>
         </div>
-
-        <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-xs font-mono tracking-wide mt-2">Initialize Asset Node</button>
       </form>
     </section>
 
     <section class="lg:col-span-7 bg-white dark:bg-[#0b1320]/40 border border-slate-100 dark:border-slate-900 rounded-[28px] overflow-hidden shadow-xl h-fit">
-      <div class="p-6 border-b border-slate-100 dark:border-slate-900/60">
-        <h2 class="text-base font-semibold text-brandDark dark:text-white tracking-tight">Active Hardware Stock Matrix</h2>
+      <div class="p-6 border-b border-slate-100 dark:border-slate-900/60 flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-semibold text-brandDark dark:text-white tracking-tight">Active Inventory Matrix</h2>
+          <p class="text-[10px] text-slate-400 font-mono mt-1">// Tap any row mapping to modify item definitions instantly.</p>
+        </div>
+        <button onclick="refreshLocalMemoryData()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg font-mono text-[11px] hover:bg-brandSkyDeep hover:text-white transition-all">🔄 Reload</button>
       </div>
       <div class="overflow-x-auto w-full">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-900 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-              <th class="p-4 w-20">ID</th>
-              <th class="p-4">Component Model</th>
+            <tr class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-900 text-[10px] font-mono text-slate-400 uppercase select-none">
+              <th class="p-4">Commodity Item</th>
               <th class="p-4">Category</th>
-              <th class="p-4">Custom Price</th>
-              <th class="p-4">Stock Registry</th>
-              <th class="p-4 text-center">Operational Commands</th>
+              <th class="p-4">Retail Rate</th>
+              <th class="p-4">Availability Status</th>
+              <th class="p-4 text-center">Action Parameters</th>
             </tr>
           </thead>
-          <tbody id="admin-table-body">
-          </tbody>
+          <tbody id="kirana-table-body" class="text-xs"></tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
 /**
