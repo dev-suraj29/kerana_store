@@ -147,7 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ========================================================
 async function fetchStoreCatalogDatabase() {
   try {
-    // Fetch all records out of your Supabase live cloud table sorted by product ID mapping
     const { data, error } = await supabase
       .from('products')
       .select('*')
@@ -155,21 +154,23 @@ async function fetchStoreCatalogDatabase() {
 
     if (error) throw error;
 
-    // Route cloud responses over to your existing UI renderer array matrices
     products = data || [];
     
-    // Extract unique category designations dynamically from the updated products array
-    categories = [...new Set(products.map(p => p.category))];
+    // Check if there are products in the cloud, if yes extract categories, if no make it empty
+    if (products.length > 0) {
+      categories = [...new Set(products.map(p => p.category))];
+    } else {
+      categories = [];
+    }
     
-    // Update structural UI templates instantly with fresh live assets
     populateDynamicFilterDropdown();
     renderStorefrontProducts(products);
     
   } catch (err) {
     console.error("Supabase pipeline breakdown telemetry log:", err.message);
-    // Secure safe fallbacks so the app components don't crash
     products = [];
     categories = [];
+    renderStorefrontProducts([]);
   }
 }
 
