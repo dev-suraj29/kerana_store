@@ -9,22 +9,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // =====================================
-// SECURITY PASSWORD
+// SECURITY PASSWORD AUTHORIZATION KEY
 // =====================================
 $admin_password = "amit@1993";
 
 // =====================================
-// DATABASE FILE PATH (Root Directory File)
+// TARGET DATABASE CONFIGURATION
 // =====================================
-$jsonFile = dirname(__FILE__) . '/products.json';
+$jsonFile = __DIR__ . '/products.json';
 
-// Forcefully attempt to unlock the root file permissions
+// Ensure writable file permissions locally or on cloud storage platforms
 if (file_exists($jsonFile)) {
     @chmod($jsonFile, 0664); 
 }
 
 // =====================================
-// READ INPUT
+// READ INCOMING TRANSMISSION DATA
 // =====================================
 $raw_input = file_get_contents("php://input");
 $data = json_decode($raw_input, true);
@@ -32,38 +32,38 @@ $data = json_decode($raw_input, true);
 if (!$data) {
     echo json_encode([
         "success" => false,
-        "message" => "Malformed or empty JSON input package received."
+        "message" => "Malformed or empty JSON data package received."
     ]);
     exit;
 }
 
 // =====================================
-// CHECK PASSWORD
+// VERIFY ROUTE SECURITY KEY
 // =====================================
 if (!isset($data['password']) || $data['password'] !== $admin_password) {
     echo json_encode([
         "success" => false,
-        "message" => "Unauthorized access: Key token mismatch."
+        "message" => "Unauthorized access: Key token mismatch validation error."
     ]);
     exit;
 }
 
 // =====================================
-// VALIDATE PRODUCTS DATA
+// CHECK DATA INTEGRITY NODE
 // =====================================
-if (!isset($data['products'])) {
+if (!isset($data['products']) || !isset($data['categories'])) {
     echo json_encode([
         "success" => false,
-        "message" => "No product array node mapping found."
+        "message" => "Incomplete arrays: Products or categories block matrix missing."
     ]);
     exit;
 }
 
 // =====================================
-// PREPARE & WRITE FILE MATRIX
+// PREPARE & WRITE NEW SYSTEM MATRIX
 // =====================================
 $finalData = [
-    "categories" => $data['categories'] ?? [],
+    "categories" => $data['categories'],
     "products" => $data['products']
 ];
 
@@ -73,18 +73,16 @@ $result = file_put_contents(
 );
 
 // =====================================
-// RESPONSE TARGET PROTOCOLS
+// RETURN STATUS TELEMETRY LOGS
 // =====================================
 if ($result !== false) {
     echo json_encode([
         "success" => true,
-        "message" => "Database updated and synchronized successfully!"
+        "message" => "Kirana database updated and synchronized successfully!"
     ]);
 } else {
-    $error = error_get_last();
     echo json_encode([
         "success" => false,
-        "message" => "Failed to write structural changes. Server says: " . ($error['message'] ?? 'Permissions Denied')
+        "message" => "Failed to write data onto server filesystem disk storage module."
     ]);
 }
-?>
