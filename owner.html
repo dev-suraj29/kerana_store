@@ -50,13 +50,15 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="text-[10px] font-mono text-slate-400 block mb-1">Commodity Category</label>
-            <div class="flex gap-2">
-              <select id="prod-cat" required class="flex-1 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 outline-none cursor-pointer"></select>
-              <button type="button" onclick="promptAddCategory()" class="px-3 rounded-xl bg-emerald-500/10 text-emerald-500 font-bold border border-emerald-500/20">+</button>
-            </div>
-          </div>
+         <div class="flex flex-col gap-2">
+  <label class="text-xs font-mono tracking-wide text-slate-400">// COMMODITY CLASS</label>
+  
+  <select id="product-category" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs focus:outline-none">
+    <option value="" disabled selected>Select Existing Class</option>
+  </select>
+
+  <input type="text" id="new-category-input" placeholder="Or type a brand new category (e.g., Spices, Snacks)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs focus:outline-none mt-1">
+</div>
           <div>
             <label class="text-[10px] font-mono text-slate-400 block mb-1">Retail Price (INR)</label>
             <input type="number" id="prod-price" required min="0" placeholder="e.g., 65" class="w-full text-xs font-mono bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:border-brandSky transition-all">
@@ -326,9 +328,21 @@ function initializeFormEngine() {
         const imagesInput = document.getElementById("product-images").value.trim();
         const imagesArray = imagesInput ? imagesInput.split(",").map(url => url.trim()) : [];
 
+        // Dynamic category selection logic
+        const dropdownCategory = document.getElementById("product-category").value;
+        const customCategory = document.getElementById("new-category-input").value.trim();
+        
+        // Prioritize the custom typed category if it exists, otherwise fall back to dropdown
+        const finalCategory = customCategory || dropdownCategory;
+
+        if (!finalCategory) {
+            alert("Please select an existing category or type a brand new one!");
+            return;
+        }
+
         const payload = {
             name: document.getElementById("product-name").value.trim(),
-            category: document.getElementById("product-category").value || "Grains & Rice",
+            category: finalCategory, // Uses the resolved category name
             price: document.getElementById("product-price").value,
             stock: document.getElementById("form-stock-state").value || "In Stock",
             details: document.getElementById("product-details").value.trim(),
@@ -375,6 +389,7 @@ window.stageProductModification = function(id) {
 function clearFormAndResetContext() {
     editingProductId = null;
     document.getElementById("product-management-form").reset();
+    document.getElementById("new-category-input").value = ""; // Clears the custom category box
     document.getElementById("form-action-title").innerText = "// PROVISION NEW STOCK ENGINE NODE";
     document.getElementById("form-submit-btn-text").innerText = "Inject Asset to Cloud";
 }
