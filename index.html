@@ -439,26 +439,51 @@
     </div>
   </div>
 
-  <script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
 /**
- * TechExpert Nexgen — Storefront Matrix UI
- * Synchronized with Live GitHub Decentralized Core Databases via Public Read Engine
+ * Velloux Kirana System — Storefront Matrix UI
+ * Synchronized with Live Supabase Cloud Database Core
  */
 
 // ========================================================
-// REPOSITORY TARGET MATRIX (UPDATE WITH YOUR USERNAME)
+// SUPABASE CLIENT INITIALIZATION CONFIGURATION
 // ========================================================
-const PRODUCTS_API = "/api/products.json";
-fetch('/api/products.json')
+const SUPABASE_URL = "sb_publishable_J39e0-43SDOkDm5BNiwz5w_vP312Wau";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyc295b2R2b3N1b3ZxdGlzbW9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3OTg2NjgsImV4cCI6MjA5NTM3NDY2OH0.kJYdFik2YAOk3FXTHieOPEI5esy3I_7R5MG-Sz6X3g0";
+
+// Initialize the active connection client instance
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ========================================================
+// REPOSITORY TARGET VARIABLES
+// ========================================================
 let products = [];
 let categories = [];
 let cart = [];
 let currentModalProduct = null;
 let currentModalQty = 1;
-    
+
+// --- LIFE CYCLE INITIALIZATION ---
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  
+  // Trigger immediate live database data extraction pool
+  fetchStoreCatalogDatabase();
+
+  initializeStoreControls();
+  initializeCartSidebarEvents();
+  initializeAdaptiveScrollTelemetry();
+  initializeSystemThemeEngine();
+});
+
+// ========================================================
+// SUPABASE REALTIME CLOUD PULL CORE ENGINE
+// ========================================================
 async function fetchStoreCatalogDatabase() {
   try {
-    // Fetch all items from your Supabase cloud table ordered by ID
+    // Fetch all records out of your Supabase live cloud table sorted by product ID mapping
     const { data, error } = await supabase
       .from('products')
       .select('*')
@@ -466,63 +491,27 @@ async function fetchStoreCatalogDatabase() {
 
     if (error) throw error;
 
-    masterCatalog = data || [];
+    // Route cloud responses over to your existing UI renderer array matrices
+    products = data || [];
     
-    // Extract unique categories dynamically from your live products array
-    const uniqueCategories = [...new Set(masterCatalog.map(p => p.category))];
-    generateCategoryFilterInterfaceElements(uniqueCategories);
+    // Extract unique category designations dynamically from the updated products array
+    categories = [...new Set(products.map(p => p.category))];
     
-    renderStorefrontGrid();
-  } catch (err) {
-    console.error("Supabase pipeline breakdown:", err.message);
-  }
-}
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-  
-  // Initial Real-time Database Pull Execution
-  fetchCloudDatabase(() => {
+    // Update structural UI templates instantly with fresh live assets
     populateDynamicFilterDropdown();
     renderStorefrontProducts(products);
-  });
-
-  initializeStoreControls();
-  initializeCartSidebarEvents();
-  initializeAdaptiveScrollTelemetry();
-  initializeSystemThemeEngine();
-
-  // Poller Matrix Sync: Refresh data from GitHub every 6 seconds completely hands-free
-  setInterval(() => {
-    fetchCloudDatabase(() => {
-      renderStorefrontProducts(products);
-    });
-  }, 6000);
-});
-
-function fetchCloudDatabase(callback) {
-  // Directly point to your local WordPress uploads path
-  const PRODUCTS_JSON_API = "/api/products.json";
-  
-  fetch(`${PRODUCTS_JSON_API}?t=${new Date().getTime()}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Server storage read communication block.");
-      return res.json();
-    })
-    .then(data => {
-      if (data) {
-        products = data.products || [];
-        categories = data.categories || [];
-        if (callback) callback();
-      }
-    })
-    .catch(err => {
-      console.error("Database load failed:", err);
-      // Fallback display matrix so the page doesn't break if the server has hiccups
-      products = [];
-      categories = [];
-    });
+    
+  } catch (err) {
+    console.error("Supabase pipeline breakdown telemetry log:", err.message);
+    // Secure safe fallbacks so the app components don't crash
+    products = [];
+    categories = [];
+  }
 }
 
+// ========================================================
+// UI RENDERING AND LOGIC IMPLEMENTATION FLOW
+// ========================================================
 function populateDynamicFilterDropdown() {
   const filterSelect = document.getElementById("category-filter");
   if (!filterSelect) return;
@@ -530,7 +519,8 @@ function populateDynamicFilterDropdown() {
   filterSelect.innerHTML = '<option value="all">All Product Classes</option>';
   categories.forEach(cat => {
     const opt = document.createElement("option");
-    opt.value = cat; opt.innerText = cat;
+    opt.value = cat; 
+    opt.innerText = cat;
     filterSelect.appendChild(opt);
   });
   filterSelect.value = currentVal;
@@ -546,16 +536,14 @@ function renderStorefrontProducts(items) {
   const filtered = items.filter(p => p.name.toLowerCase().includes(text) && (cat === "all" || p.category === cat));
   filtered.sort((a, b) => a.id - b.id);
   
-  // Preserve inner structure space cleanly without creating constant screen blinking
   if (filtered.length === 0) {
     productsGrid.innerHTML = `<div class="col-span-full py-16 text-center"><h2 class="text-sm font-mono text-slate-400">No matching models discovered in backend matrix registry.</h2></div>`;
     return;
   }
 
-  // Optimize dynamic HTML creation string matching structures
   let gridHTML = "";
   filtered.forEach(product => {
-    const primaryImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=600&q=80';
+    const primaryImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
     const isOutOfStock = product.stock === 'Out of Stock';
 
     gridHTML += `
@@ -566,7 +554,7 @@ function renderStorefrontProducts(items) {
           </div>
           <div class="flex justify-between items-center mb-2">
             <span class="font-mono text-[9px] uppercase tracking-wider text-slate-400">// ${product.category}</span>
-            <span class="text-[10px] font-medium text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">⭐ ${product.rating || 5.0}</span>
+            <span class="text-[10px] font-medium text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">⭐ ${product.rating || 4.5}</span>
           </div>
           <h3 class="text-base font-semibold tracking-tight text-brandDark dark:text-white mb-1 group-hover:text-brandSky">${product.name}</h3>
           <p class="text-[10px] font-mono tracking-wide ${isOutOfStock ? 'text-rose-500' : 'text-emerald-500'} mb-4">${product.stock}</p>
@@ -598,7 +586,8 @@ window.openProductModal = function(id) {
   const target = products.find(p => p.id === id);
   if (!target) return;
 
-  currentModalProduct = target; currentModalQty = 1;
+  currentModalProduct = target; 
+  currentModalQty = 1;
   document.getElementById("modal-qty-counter").innerText = currentModalQty;
   document.getElementById("modal-name").innerText = target.name;
   document.getElementById("modal-category").innerText = `// ${target.category}`;
@@ -622,9 +611,10 @@ window.openProductModal = function(id) {
 
   const mediaContainer = document.getElementById("modal-main-media");
   const thumbContainer = document.getElementById("modal-thumbnails");
-  mediaContainer.innerHTML = ""; thumbContainer.innerHTML = "";
+  if (mediaContainer) mediaContainer.innerHTML = ""; 
+  if (thumbContainer) thumbContainer.innerHTML = "";
 
-  let assetImages = target.images && target.images.length > 0 ? target.images : ["https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=600&q=80"];
+  let assetImages = target.images && target.images.length > 0 ? target.images : ["https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80"];
   setModalMainDisplayAsset(assetImages[0], 'image');
 
   assetImages.forEach((imgUrl, idx) => {
@@ -653,7 +643,8 @@ window.openProductModal = function(id) {
 
 function setModalMainDisplayAsset(url, type) {
   const container = document.getElementById("modal-main-media");
-  if (!container) return; container.innerHTML = "";
+  if (!container) return; 
+  container.innerHTML = "";
   container.innerHTML = type === 'video' ? `<video src="${url}" controls autoplay muted loop class="w-full h-full object-cover rounded-2xl"></video>` : `<img src="${url}" class="w-full h-full object-cover rounded-2xl">`;
 }
 
@@ -664,7 +655,8 @@ window.closeProductModal = function() {
 };
 
 window.adjustModalQty = function(delta) {
-  currentModalQty += delta; if (currentModalQty < 1) currentModalQty = 1;
+  currentModalQty += delta; 
+  if (currentModalQty < 1) currentModalQty = 1;
   document.getElementById("modal-qty-counter").innerText = currentModalQty;
 };
 
@@ -682,7 +674,11 @@ window.addModalItemToCart = function() {
 
 function pushStagedCartAllocation(item, quantity) {
   const existingRecord = cart.find(c => c.product.id === item.id);
-  if (existingRecord) { existingRecord.quantity += quantity; } else { cart.push({ product: item, quantity: quantity }); }
+  if (existingRecord) { 
+    existingRecord.quantity += quantity; 
+  } else { 
+    cart.push({ product: item, quantity: quantity }); 
+  }
   updateCartDisplayMatrix();
   showToast(`${quantity}x ${item.name} added to cart.`);
 }
@@ -699,12 +695,13 @@ function updateCartDisplayMatrix() {
 
   if (cart.length === 0) {
     container.innerHTML = `<div class="py-12 text-center"><h3 class="text-xs font-mono text-slate-400">Cart is empty.</h3></div>`;
-    totalDisplay.innerText = "0"; return;
+    totalDisplay.innerText = "0"; 
+    return;
   }
 
   cart.forEach((entry, index) => {
     totalSum += Number(entry.product.price) * entry.quantity;
-    const primaryImg = (entry.product.images && entry.product.images.length > 0) ? entry.product.images[0] : '';
+    const primaryImg = (entry.product.images && entry.product.images.length > 0) ? entry.product.images[0] : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
     const div = document.createElement("div");
     div.className = "flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100";
     div.innerHTML = `
@@ -721,7 +718,10 @@ function updateCartDisplayMatrix() {
   totalDisplay.innerText = totalSum.toLocaleString();
 }
 
-window.removeItemFromCart = function(index) { cart.splice(index, 1); updateCartDisplayMatrix(); };
+window.removeItemFromCart = function(index) { 
+  cart.splice(index, 1); 
+  updateCartDisplayMatrix(); 
+};
 
 function initializeCartSidebarEvents() {
   const sidebar = document.getElementById("cart-sidebar");
@@ -739,8 +739,10 @@ function initializeCartSidebarEvents() {
   if (chkBtn) {
     chkBtn.addEventListener("click", () => {
       if (cart.length === 0) return;
-      let msg = "TechExpert Nexgen Sourcing Order Protocol:%0A%0A";
-      cart.forEach((entry, i) => { msg += `${i+1}. ${entry.product.name}%0A   Qty: ${entry.quantity}%0A   Rate: ₹${Number(entry.product.price).toLocaleString()}%0A%0A`; });
+      let msg = "Velloux Kirana Sourcing Order Protocol:%0A%0A";
+      cart.forEach((entry, i) => { 
+        msg += `${i+1}. ${entry.product.name}%0A   Qty: ${entry.quantity}%0A   Rate: ₹${Number(entry.product.price).toLocaleString()}%0A%0A`; 
+      });
       window.open(`https://wa.me/917030024001?text=${msg}`, "_blank");
     });
   }
@@ -758,16 +760,26 @@ function initializeSystemThemeEngine() {
   const switchBtn = document.getElementById("theme-toggle");
   if (!switchBtn) return;
   switchBtn.addEventListener("click", () => {
-    if (document.documentElement.classList.contains('dark')) { document.documentElement.classList.remove('dark'); localStorage.theme = 'light'; }
-    else { document.documentElement.classList.add('dark'); localStorage.theme = 'dark'; }
+    if (document.documentElement.classList.contains('dark')) { 
+      document.documentElement.classList.remove('dark'); 
+      localStorage.theme = 'light'; 
+    } else { 
+      document.documentElement.classList.add('dark'); 
+      localStorage.theme = 'dark'; 
+    }
   });
 }
 
 function showToast(msg) {
-  const toast = document.createElement("div"); toast.className = "toast"; toast.innerText = msg;
+  const toast = document.createElement("div"); 
+  toast.className = "toast"; 
+  toast.innerText = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add("show"), 100);
-  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 300); }, 2500);
+  setTimeout(() => { 
+    toast.classList.remove("show"); 
+    setTimeout(() => toast.remove(), 300); 
+  }, 2500);
 }
 </script>
 </body>
